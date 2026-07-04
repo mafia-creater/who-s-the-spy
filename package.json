@@ -1,0 +1,22 @@
+{
+  "name": "whosthespy-bot",
+  "version": "1.0.0",
+  "description": "Discord party game bot implementing the Who's the Spy social deduction word game",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "npx tsx src/index.ts",
+    "deploy": "npx tsx src/deploy.ts"
+  },
+  "keywords": ["discord", "bot", "whosthespy", "party-game", "social-deduction"],
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^14.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.8.0"
+  }
+}
