@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  whosthespy-bot:
+    build: .
+    container_name: whosthespy-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    # Optional: If you want to view logs easily, you can uncomment the below lines
+    # logging:
+    #   driver: "json-file"
+    #   options:
+    #     max-size: "10m"
+    #     max-file: "3"
