@@ -156,7 +156,7 @@ async function handleMrWhiteGuess(
           content: correct
             ? '🎉 You guessed correctly!'
             : '❌ Wrong guess!',
-          ephemeral: true,
+          flags: ['Ephemeral'],
         });
 
         // Post the result to the channel

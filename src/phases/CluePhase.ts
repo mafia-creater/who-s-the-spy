@@ -223,7 +223,7 @@ async function collectClueFromPlayer(
         if (player?.word && rawClue.toLowerCase() === player.word.toLowerCase()) {
           await modalInteraction.reply({
             content: '⚠️ You cannot use your exact word as a clue! Try something else.',
-            ephemeral: true,
+            flags: ['Ephemeral'],
           });
           // Don't resolve — let the collector keep listening for another attempt
           return;
@@ -232,7 +232,7 @@ async function collectClueFromPlayer(
         // Accept the clue
         await modalInteraction.reply({
           content: `✅ Clue submitted: **"${rawClue}"**`,
-          ephemeral: true,
+          flags: ['Ephemeral'],
         });
 
         finish(rawClue);

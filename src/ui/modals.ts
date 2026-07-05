@@ -56,3 +56,39 @@ export function mrWhiteGuessModal(guildId: string): ModalBuilder {
     .setTitle('Mr. White — Guess the Word!')
     .addComponents(row);
 }
+
+// ─── Edit Settings Modal ─────────────────────────────────────────────────────
+
+import type { GameSettings } from '../types.js';
+
+export function editSettingsModal(settings: GameSettings, guildId: string): ModalBuilder {
+  const clueInput = new TextInputBuilder()
+    .setCustomId('clueTimer')
+    .setLabel('Clue Phase Timer (seconds)')
+    .setStyle(TextInputStyle.Short)
+    .setValue(settings.clueTimerSeconds.toString())
+    .setRequired(true);
+
+  const discussionInput = new TextInputBuilder()
+    .setCustomId('discussionTimer')
+    .setLabel('Discussion Phase Timer (seconds)')
+    .setStyle(TextInputStyle.Short)
+    .setValue(settings.discussionTimerSeconds.toString())
+    .setRequired(true);
+
+  const voteInput = new TextInputBuilder()
+    .setCustomId('voteTimer')
+    .setLabel('Voting Phase Timer (seconds)')
+    .setStyle(TextInputStyle.Short)
+    .setValue(settings.voteTimerSeconds.toString())
+    .setRequired(true);
+
+  return new ModalBuilder()
+    .setCustomId(ID.make(Actions.EditSettingsModal, guildId))
+    .setTitle('Edit Game Timers')
+    .addComponents(
+      new ActionRowBuilder<TextInputBuilder>().addComponents(clueInput),
+      new ActionRowBuilder<TextInputBuilder>().addComponents(discussionInput),
+      new ActionRowBuilder<TextInputBuilder>().addComponents(voteInput)
+    );
+}

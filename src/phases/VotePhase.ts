@@ -90,7 +90,7 @@ export async function runVotePhase(
         if (!voter || !voter.isAlive) {
           await interaction.reply({
             content: '⚠️ You cannot vote — you are not an active player!',
-            ephemeral: true,
+            flags: ['Ephemeral'],
           });
           return;
         }
@@ -99,7 +99,7 @@ export async function runVotePhase(
         if (targetId === voterId) {
           await interaction.reply({
             content: '⚠️ You cannot vote for yourself!',
-            ephemeral: true,
+            flags: ['Ephemeral'],
           });
           return;
         }
@@ -109,7 +109,7 @@ export async function runVotePhase(
         if (!target || !target.isAlive) {
           await interaction.reply({
             content: '⚠️ That player is not available for voting!',
-            ephemeral: true,
+            flags: ['Ephemeral'],
           });
           return;
         }
@@ -125,7 +125,7 @@ export async function runVotePhase(
 
         await interaction.reply({
           content: voteMsg,
-          ephemeral: true,
+          flags: ['Ephemeral'],
         });
 
         // Update the vote count on the embed

@@ -59,7 +59,7 @@ export async function execute(
     default:
       await interaction.reply({
         content: '❌ Unknown subcommand.',
-        ephemeral: true,
+        flags: ['Ephemeral'],
       });
   }
 }
@@ -81,7 +81,7 @@ async function handleStart(
   if (!guildId) {
     await interaction.reply({
       content: '❌ This command can only be used in a server.',
-      ephemeral: true,
+      flags: ['Ephemeral'],
     });
     return;
   }
@@ -91,7 +91,7 @@ async function handleStart(
     await interaction.reply({
       content:
         '❌ A game is already running in this server! Use `/whosthespy end` to stop it first.',
-      ephemeral: true,
+      flags: ['Ephemeral'],
     });
     return;
   }
@@ -100,7 +100,7 @@ async function handleStart(
   if (!(channel instanceof TextChannel)) {
     await interaction.reply({
       content: '❌ This command must be used in a text channel.',
-      ephemeral: true,
+      flags: ['Ephemeral'],
     });
     return;
   }
@@ -108,10 +108,22 @@ async function handleStart(
   // Create the game state
   const game = gameManager.createGame(guildId, channelId, interaction.user.id);
 
+  // Automatically add the host to the game
+  game.players.set(interaction.user.id, {
+    userId: interaction.user.id,
+    username: interaction.user.username,
+    displayName: interaction.member && 'displayName' in interaction.member
+      ? (interaction.member.displayName as string)
+      : interaction.user.displayName,
+    isAlive: true,
+    hasGivenClue: false,
+    dmFailed: false,
+  });
+
   // Acknowledge the interaction immediately
   await interaction.reply({
     content: '🎭 **Setting up Undercover…** The lobby will appear below!',
-    ephemeral: true,
+    flags: ['Ephemeral'],
   });
 
   // Run the lobby phase — the lobby embed is posted as a separate channel
@@ -157,7 +169,7 @@ async function handleStatus(
   if (!guildId) {
     await interaction.reply({
       content: '❌ This command can only be used in a server.',
-      ephemeral: true,
+      flags: ['Ephemeral'],
     });
     return;
   }
@@ -167,7 +179,7 @@ async function handleStatus(
   if (!game) {
     await interaction.reply({
       content: '📭 No active game in this server. Use `/whosthespy start` to begin one!',
-      ephemeral: true,
+      flags: ['Ephemeral'],
     });
     return;
   }
@@ -191,7 +203,7 @@ async function handleEnd(
   if (!guildId) {
     await interaction.reply({
       content: '❌ This command can only be used in a server.',
-      ephemeral: true,
+      flags: ['Ephemeral'],
     });
     return;
   }
@@ -201,7 +213,7 @@ async function handleEnd(
   if (!game) {
     await interaction.reply({
       content: '📭 No active game to end.',
-      ephemeral: true,
+      flags: ['Ephemeral'],
     });
     return;
   }
@@ -215,7 +227,7 @@ async function handleEnd(
     await interaction.reply({
       content:
         '❌ Only the game host or a server manager can end the game.',
-      ephemeral: true,
+      flags: ['Ephemeral'],
     });
     return;
   }

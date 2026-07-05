@@ -44,6 +44,28 @@ export function settingsButtons(
       .setLabel(mrWhiteEnabled ? 'Mr. White: ON' : 'Mr. White: OFF')
       .setEmoji('👻')
       .setStyle(mrWhiteEnabled ? ButtonStyle.Primary : ButtonStyle.Secondary),
+      
+    new ButtonBuilder()
+      .setCustomId(ID.make(Actions.EditSettings, guildId))
+      .setLabel('Edit Timers')
+      .setEmoji('⚙️')
+      .setStyle(ButtonStyle.Secondary),
+  );
+}
+
+// ─── Skip Button ─────────────────────────────────────────────────────────────
+
+export function skipDiscussionButton(
+  guildId: string,
+  skipCount: number,
+  totalAlive: number,
+): ActionRowBuilder<ButtonBuilder> {
+  return new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder()
+      .setCustomId(ID.make(Actions.SkipDiscussion, guildId))
+      .setLabel(`Skip Discussion (${skipCount}/${totalAlive})`)
+      .setEmoji('⏭️')
+      .setStyle(ButtonStyle.Secondary),
   );
 }
 

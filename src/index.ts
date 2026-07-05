@@ -1,31 +1,8 @@
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
-
-// ─── Load .env File ──────────────────────────────────────────────────────────
-// Must run before any config imports so process.env is populated.
-
-try {
-  const envPath = resolve(process.cwd(), '.env');
-  const envFile = readFileSync(envPath, 'utf-8');
-
-  for (const line of envFile.split('\n')) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) continue;
-
-    const eqIndex = trimmed.indexOf('=');
-    if (eqIndex === -1) continue;
-
-    const key = trimmed.slice(0, eqIndex).trim();
-    const value = trimmed.slice(eqIndex + 1).trim();
-    process.env[key] = value;
-  }
-} catch {
-  // .env file not found — use existing environment variables
-}
+import './env.js';
 
 // ─── Imports (after env loading) ─────────────────────────────────────────────
 
-import { Client, GatewayIntentBits, Events } from 'discord.js';
+import { Client, GatewayIntentBits, Events, ActivityType } from 'discord.js';
 import { DISCORD_TOKEN } from './config.js';
 import { execute } from './commands/whosthespy.js';
 
@@ -42,6 +19,14 @@ const client = new Client({
 
 client.once(Events.ClientReady, (readyClient) => {
   console.log(`✅ Logged in as ${readyClient.user.tag}`);
+  
+  readyClient.user.setPresence({
+    activities: [{ 
+      name: 'Who\'s the Spy | /whosthespy start', 
+      type: ActivityType.Playing 
+    }],
+    status: 'online',
+  });
 });
 
 // ─── Interaction Handling ────────────────────────────────────────────────────
@@ -56,23 +41,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
       return;
     }
 
-    // ── Expired Button / Modal Catch-All ─────────────────────────────────
-    // Button and modal interactions for active games are handled by
-    // component collectors in the phase files. If an interaction with the
-    // 'wts:' prefix reaches here, it means the collector has already ended
-    // (the phase timed out or the game ended).
-    if (interaction.isButton() || interaction.isModalSubmit()) {
-      if (interaction.customId.startsWith('wts:')) {
-        // Guard: only reply if we haven't already
-        if (!interaction.replied && !interaction.deferred) {
-          await interaction.reply({
-            content: '⏰ This interaction has expired. The game may have moved on or ended.',
-            ephemeral: true,
-          });
-        }
-      }
-      return;
-    }
+
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`[index] Interaction handler error: ${message}`);
@@ -82,7 +51,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
       if (interaction.isRepliable() && !interaction.replied && !interaction.deferred) {
         await interaction.reply({
           content: '❌ Something went wrong processing that interaction.',
-          ephemeral: true,
+          flags: ['Ephemeral'],
         });
       }
     } catch {

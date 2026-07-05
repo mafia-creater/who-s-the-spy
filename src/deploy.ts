@@ -1,30 +1,6 @@
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
+import './env.js';
 import { REST, Routes } from 'discord.js';
 import { data } from './commands/whosthespy.js';
-
-// ─── Load .env File ──────────────────────────────────────────────────────────
-// Reads a `.env` file from the project root and populates process.env.
-// Falls back silently to existing environment variables if the file is missing.
-
-try {
-  const envPath = resolve(process.cwd(), '.env');
-  const envFile = readFileSync(envPath, 'utf-8');
-
-  for (const line of envFile.split('\n')) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) continue;
-
-    const eqIndex = trimmed.indexOf('=');
-    if (eqIndex === -1) continue;
-
-    const key = trimmed.slice(0, eqIndex).trim();
-    const value = trimmed.slice(eqIndex + 1).trim();
-    process.env[key] = value;
-  }
-} catch {
-  // .env file not found — use existing environment variables
-}
 
 // ─── Read Config ─────────────────────────────────────────────────────────────
 // Import config *after* loading .env so the env vars are available.

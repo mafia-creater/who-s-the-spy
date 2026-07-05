@@ -5,6 +5,7 @@ import { ID, Actions, MIN_PLAYERS, MAX_PLAYERS } from '../config.js';
 import { gameManager } from '../game/GameManager.js';
 import { lobbyEmbed } from '../ui/embeds.js';
 import { lobbyButtons, settingsButtons } from '../ui/buttons.js';
+import { editSettingsModal } from '../ui/modals.js';
 
 // ─── Lobby Phase ─────────────────────────────────────────────────────────────
 
@@ -50,12 +51,13 @@ export async function runLobbyPhase(
       filter: (i) => {
         const parsed = ID.parse(i.customId);
         if (!parsed || parsed.guildId !== guildId) return false;
-        return ([Actions.Join, Actions.Leave, Actions.Start, Actions.ToggleMrWhite] as string[])
+        return ([Actions.Join, Actions.Leave, Actions.Start, Actions.ToggleMrWhite, Actions.EditSettings] as string[])
           .includes(parsed.action);
       },
     });
 
     collector.on('collect', async (interaction) => {
+      // Parse custom ID
       const parsed = ID.parse(interaction.customId);
       if (!parsed) return;
 
@@ -68,7 +70,7 @@ export async function runLobbyPhase(
             if (game.players.has(userId)) {
               await interaction.reply({
                 content: '⚠️ You are already in the game!',
-                ephemeral: true,
+                flags: ['Ephemeral'],
               });
               return;
             }
@@ -76,7 +78,7 @@ export async function runLobbyPhase(
             if (game.players.size >= MAX_PLAYERS) {
               await interaction.reply({
                 content: `⚠️ The lobby is full! Maximum **${MAX_PLAYERS}** players.`,
-                ephemeral: true,
+                flags: ['Ephemeral'],
               });
               return;
             }
@@ -108,7 +110,7 @@ export async function runLobbyPhase(
             if (!game.players.has(userId)) {
               await interaction.reply({
                 content: '⚠️ You are not in the game!',
-                ephemeral: true,
+                flags: ['Ephemeral'],
               });
               return;
             }
@@ -116,7 +118,7 @@ export async function runLobbyPhase(
             if (userId === hostId) {
               await interaction.reply({
                 content: '⚠️ The host cannot leave! Use `/whosthespy end` to cancel the game.',
-                ephemeral: true,
+                flags: ['Ephemeral'],
               });
               return;
             }
@@ -135,7 +137,7 @@ export async function runLobbyPhase(
             if (interaction.user.id !== hostId) {
               await interaction.reply({
                 content: '⚠️ Only the host can change settings!',
-                ephemeral: true,
+                flags: ['Ephemeral'],
               });
               return;
             }
@@ -153,12 +155,72 @@ export async function runLobbyPhase(
             break;
           }
 
+          // ── Edit Settings ────────────────────────────────────────────
+          case Actions.EditSettings: {
+            if (interaction.user.id !== hostId) {
+              await interaction.reply({
+                content: '⚠️ Only the host can change settings!',
+                flags: ['Ephemeral'],
+              });
+              return;
+            }
+
+            await interaction.showModal(editSettingsModal(game.settings, guildId));
+
+            try {
+              console.log('[EditSettings] Awaiting modal submit...');
+              const modalSubmit = await interaction.awaitModalSubmit({
+                time: 300_000,
+                filter: (i) =>
+                  i.customId === ID.make(Actions.EditSettingsModal, guildId) &&
+                  i.user.id === hostId,
+              });
+              console.log('[EditSettings] Modal submitted!');
+
+              const clueStr = modalSubmit.fields.getTextInputValue('clueTimer');
+              const discStr = modalSubmit.fields.getTextInputValue('discussionTimer');
+              const voteStr = modalSubmit.fields.getTextInputValue('voteTimer');
+
+              const clueVal = parseInt(clueStr, 10);
+              const discVal = parseInt(discStr, 10);
+              const voteVal = parseInt(voteStr, 10);
+
+              if (
+                isNaN(clueVal) || clueVal < 10 || clueVal > 300 ||
+                isNaN(discVal) || discVal < 10 || discVal > 300 ||
+                isNaN(voteVal) || voteVal < 10 || voteVal > 300
+              ) {
+                await modalSubmit.reply({
+                  content: '⚠️ Timers must be valid numbers between 10 and 300 seconds.',
+                  flags: ['Ephemeral'],
+                });
+                return;
+              }
+
+              game.settings.clueTimerSeconds = clueVal;
+              game.settings.discussionTimerSeconds = discVal;
+              game.settings.voteTimerSeconds = voteVal;
+
+              await modalSubmit.deferUpdate();
+              await lobbyMsg.edit({
+                embeds: [lobbyEmbed(game.players, game.settings, hostName)],
+                components: [
+                  lobbyButtons(guildId),
+                  settingsButtons(guildId, game.settings.mrWhiteEnabled),
+                ],
+              });
+            } catch (err) {
+              // Modal timed out or failed, do nothing
+            }
+            break;
+          }
+
           // ── Start ────────────────────────────────────────────────────
           case Actions.Start: {
             if (interaction.user.id !== hostId) {
               await interaction.reply({
                 content: '⚠️ Only the host can start the game!',
-                ephemeral: true,
+                flags: ['Ephemeral'],
               });
               return;
             }
@@ -166,7 +228,7 @@ export async function runLobbyPhase(
             if (game.players.size < MIN_PLAYERS) {
               await interaction.reply({
                 content: `⚠️ Not enough players! Need at least **${MIN_PLAYERS}**, currently have **${game.players.size}**.`,
-                ephemeral: true,
+                flags: ['Ephemeral'],
               });
               return;
             }
