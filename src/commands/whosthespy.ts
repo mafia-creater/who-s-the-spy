@@ -2,7 +2,7 @@ import {
   SlashCommandBuilder,
   ChatInputCommandInteraction,
   PermissionFlagsBits,
-  TextBasedChannel,
+  TextChannel,
 } from 'discord.js';
 import { gameManager } from '../game/GameManager.js';
 import { runGame } from '../game/PhaseRunner.js';
@@ -104,6 +104,8 @@ async function handleStart(
     });
     return;
   }
+  
+  const textChannel = channel as TextChannel;
 
   // Create the game state
   const game = gameManager.createGame(guildId, channelId, interaction.user.id);
@@ -129,11 +131,11 @@ async function handleStart(
   // Run the lobby phase — the lobby embed is posted as a separate channel
   // message so button collectors can edit it freely.
   try {
-    const started = await runLobbyPhase(game, channel);
+    const started = await runLobbyPhase(game, textChannel);
 
     if (started) {
       // Lobby completed successfully — transition to the game
-      await runGame(game, channel);
+      await runGame(game, textChannel);
     } else {
       // Lobby was cancelled or timed out
       gameManager.endGame(guildId);
@@ -143,7 +145,7 @@ async function handleStart(
     console.error(`[undercover:start] Error: ${message}`);
 
     try {
-      await channel.send(
+      await textChannel.send(
         `❌ **Failed to start the game.**\n\`\`\`${message}\`\`\``,
       );
     } catch {
