@@ -96,10 +96,18 @@ async function handleStart(
     return;
   }
 
-  const channel = interaction.channel;
-  if (!channel || !channel.isTextBased()) {
+  let channel = interaction.channel;
+  if (!channel && interaction.channelId) {
+    try {
+      channel = (await interaction.client.channels.fetch(interaction.channelId)) as any;
+    } catch {
+      // ignore
+    }
+  }
+
+  if (!channel || !('send' in channel)) {
     await interaction.reply({
-      content: '❌ This command must be used in a text channel.',
+      content: '❌ This command must be used in a channel where I can send messages.',
       flags: ['Ephemeral'],
     });
     return;
