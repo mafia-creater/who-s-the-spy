@@ -2,7 +2,7 @@ import {
   SlashCommandBuilder,
   ChatInputCommandInteraction,
   PermissionFlagsBits,
-  TextChannel,
+  TextBasedChannel,
 } from 'discord.js';
 import { gameManager } from '../game/GameManager.js';
 import { runGame } from '../game/PhaseRunner.js';
@@ -97,7 +97,7 @@ async function handleStart(
   }
 
   const channel = interaction.channel;
-  if (!(channel instanceof TextChannel)) {
+  if (!channel || !channel.isTextBased()) {
     await interaction.reply({
       content: '❌ This command must be used in a text channel.',
       flags: ['Ephemeral'],
