@@ -108,9 +108,12 @@ async function handleMrWhiteGuess(
       resolve(result);
     };
 
+    const startTime = Date.now();
+    const TOTAL_TIME = 30_000;
+
     const collector = guessMsg!.createMessageComponentCollector({
       componentType: ComponentType.Button,
-      time: 30_000, // 30 seconds to click the button
+      time: TOTAL_TIME, // 30 seconds combined for clicking and filling modal
       filter: (i) => {
         const parsed = ID.parse(i.customId);
         return (
@@ -126,12 +129,20 @@ async function handleMrWhiteGuess(
       if (resolved) return;
 
       try {
+        const timeElapsed = Date.now() - startTime;
+        const timeRemaining = Math.max(0, TOTAL_TIME - timeElapsed);
+        
+        if (timeRemaining <= 0) {
+          // Fallback if they somehow clicked right at the end
+          throw new Error('Time is up');
+        }
+
         // Show the guess modal
         await interaction.showModal(mrWhiteGuessModal(guildId));
 
         // Await the modal submission
         const modalInteraction = await interaction.awaitModalSubmit({
-          time: 30_000,
+          time: timeRemaining,
           filter: (mi) => {
             const parsed = ID.parse(mi.customId);
             return (

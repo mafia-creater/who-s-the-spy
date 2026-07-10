@@ -94,24 +94,15 @@ export function roleAssignedEmbed(role: Role, word?: string): EmbedBuilder {
 
   switch (role) {
     case Role.Civilian:
-      embed
-        .setTitle('🎭 Your Role: Civilian')
-        .setDescription(
-          'You are an ordinary **Civilian**.\n' +
-          'Blend in, give subtle clues, and find the impostors!\n\n' +
-          `🔑 **Your word:** \`${word}\`\n\n` +
-          '> Give clues that prove you know the word — but don\'t make it too obvious!',
-        );
-      break;
-
     case Role.Spy:
       embed
-        .setTitle('🕵️ Your Role: Spy')
+        .setTitle('🎭 Your Role: Civilian OR Spy')
         .setDescription(
-          'You are the **Spy**.\n' +
-          'Your word is *similar* to the civilians\' — but not the same!\n\n' +
+          'You are either a **Civilian** or the **Spy**.\n' +
+          'Blend in, give subtle clues, and figure out who is who!\n\n' +
           `🔑 **Your word:** \`${word}\`\n\n` +
-          '> Blend in. Act like you belong. Survive every vote.',
+          '> If you are the Civilian, find the impostors.\n' +
+          '> If you are the Spy, blend in and survive!',
         );
       break;
 
@@ -288,15 +279,12 @@ export function eliminationEmbed(
   role: Role,
   word?: string,
 ): EmbedBuilder {
-  const wordLine = word ? `Their word was: \`${word}\`` : 'They had no word.';
-
   return new EmbedBuilder()
     .setColor(Colors.Vote)
     .setTitle('💀 Elimination')
     .setDescription(
       `**${playerName}** has been eliminated!\n\n` +
-      `${roleEmoji(role)} They were a **${role}**.\n` +
-      wordLine,
+      `${roleEmoji(role)} They were a **${role}**.\n`,
     )
     .setTimestamp();
 }
