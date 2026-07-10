@@ -4,7 +4,8 @@ import './env.js';
 
 import { Client, GatewayIntentBits, Events, ActivityType } from 'discord.js';
 import { DISCORD_TOKEN } from './config.js';
-import { execute } from './commands/whosthespy.js';
+import { execute as executeWhosTheSpy } from './commands/whosthespy.js';
+import { execute as executeHelp } from './commands/help.js';
 
 // ─── Client Setup ────────────────────────────────────────────────────────────
 
@@ -36,7 +37,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
     // ── Slash Commands ────────────────────────────────────────────────────
     if (interaction.isChatInputCommand()) {
       if (interaction.commandName === 'whosthespy') {
-        await execute(interaction);
+        await executeWhosTheSpy(interaction);
+      } else if (interaction.commandName === 'help') {
+        await executeHelp(interaction);
       }
       return;
     }

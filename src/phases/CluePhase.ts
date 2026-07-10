@@ -76,9 +76,10 @@ export async function runCluePhase(
 
     game.currentTurnIndex = turnIdx;
 
-    // Update the embed to show whose turn it is
+    // Delete the old message and send a new one so it stays at the bottom of the chat
     try {
-      await phaseMsg.edit({
+      if (phaseMsg) await phaseMsg.delete().catch(() => {});
+      phaseMsg = await channel.send({
         embeds: [
           cluePhaseEmbed(
             aliveTurnOrder.map((id) => game.players.get(id)!.displayName),
@@ -90,8 +91,9 @@ export async function runCluePhase(
         ],
         components: [clueButton(guildId)],
       });
+      game.phaseMessageId = phaseMsg.id;
     } catch {
-      // Message may have been deleted
+      // Channel may have been deleted or missing permissions
     }
 
     // ── Collect the clue via button + modal ───────────────────────────
@@ -112,7 +114,8 @@ export async function runCluePhase(
 
     // Update embed to show the submitted clue
     try {
-      await phaseMsg.edit({
+      if (phaseMsg) await phaseMsg.delete().catch(() => {});
+      phaseMsg = await channel.send({
         embeds: [
           cluePhaseEmbed(
             aliveTurnOrder.map((id) => game.players.get(id)!.displayName),
@@ -126,8 +129,9 @@ export async function runCluePhase(
           ? [clueButton(guildId)]
           : [], // Remove button on last player
       });
+      game.phaseMessageId = phaseMsg.id;
     } catch {
-      // Message may have been deleted
+      // Channel may have been deleted or missing permissions
     }
 
     // Small delay between turns for readability
@@ -138,7 +142,8 @@ export async function runCluePhase(
 
   // ── Post final clue summary ───────────────────────────────────────────
   try {
-    await phaseMsg.edit({
+    if (phaseMsg) await phaseMsg.delete().catch(() => {});
+    phaseMsg = await channel.send({
       embeds: [
         cluePhaseEmbed(
           aliveTurnOrder.map((id) => game.players.get(id)!.displayName),
@@ -150,8 +155,9 @@ export async function runCluePhase(
       ],
       components: [],
     });
+    game.phaseMessageId = phaseMsg.id;
   } catch {
-    // Message may have been deleted
+    // Channel may have been deleted or missing permissions
   }
 }
 

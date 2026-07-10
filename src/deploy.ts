@@ -1,6 +1,7 @@
 import './env.js';
 import { REST, Routes } from 'discord.js';
-import { data } from './commands/whosthespy.js';
+import { data as whosthespyData } from './commands/whosthespy.js';
+import { data as helpData } from './commands/help.js';
 
 // ─── Read Config ─────────────────────────────────────────────────────────────
 // Import config *after* loading .env so the env vars are available.
@@ -23,7 +24,7 @@ if (!CLIENT_ID) {
 
 // ─── Deploy Commands ─────────────────────────────────────────────────────────
 
-const commands = [data.toJSON()];
+const commands = [whosthespyData.toJSON(), helpData.toJSON()];
 const rest = new REST({ version: '10' }).setToken(DISCORD_TOKEN);
 
 async function deploy(): Promise<void> {
