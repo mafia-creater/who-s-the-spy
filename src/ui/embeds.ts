@@ -254,15 +254,27 @@ export function voteResultsEmbed(
 /**
  * Displayed when a vote ends in a tie — nobody is eliminated.
  */
-export function tieEmbed(tiedNames: string[], round: number): EmbedBuilder {
+export function tieEmbed(tiedNames: string[], round: number, isSkip = false): EmbedBuilder {
   const nameList = tiedNames.map(n => `• **${n}**`).join('\n');
+
+  if (isSkip) {
+    return new EmbedBuilder()
+      .setColor(Colors.Discussion)
+      .setTitle('⏭️ Vote Skipped!')
+      .setDescription(
+        'The majority chose to skip the vote — **no one is eliminated** this round.\n\n' +
+        '> The game continues to the next round!',
+      )
+      .setFooter({ text: roundFooter(round) })
+      .setTimestamp();
+  }
 
   return new EmbedBuilder()
     .setColor(Colors.Discussion)
     .setTitle('⚖️ It\'s a Tie!')
     .setDescription(
       'The vote ended in a tie — **no one is eliminated** this round.\n\n' +
-      `Tied players:\n${nameList}\n\n` +
+      (nameList ? `Tied players:\n${nameList}\n\n` : '') +
       '> The game continues to the next round!',
     )
     .setFooter({ text: roundFooter(round) })

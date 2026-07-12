@@ -120,10 +120,21 @@ export function voteButtons(
     count++;
   }
 
-  // Push the last row if it has any buttons
-  if (count > 0) {
+  // Add the skip button
+  if (count > 0 && count % MAX_BUTTONS_PER_ROW === 0) {
     rows.push(currentRow);
+    currentRow = new ActionRowBuilder<ButtonBuilder>();
   }
+  
+  currentRow.addComponents(
+    new ButtonBuilder()
+      .setCustomId(ID.make(Actions.Vote, guildId, 'SKIP'))
+      .setLabel('Skip Vote')
+      .setEmoji('⏭️')
+      .setStyle(ButtonStyle.Danger),
+  );
+  
+  rows.push(currentRow);
 
   return rows;
 }

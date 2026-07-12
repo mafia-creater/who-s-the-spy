@@ -104,24 +104,37 @@ export async function runVotePhase(
           return;
         }
 
-        // Verify the target is an alive player
-        const target = game.players.get(targetId);
-        if (!target || !target.isAlive) {
-          await interaction.reply({
-            content: '⚠️ That player is not available for voting!',
-            flags: ['Ephemeral'],
-          });
-          return;
+        // Verify the target is an alive player (or SKIP)
+        if (targetId !== 'SKIP') {
+          const target = game.players.get(targetId);
+          if (!target || !target.isAlive) {
+            await interaction.reply({
+              content: '⚠️ That player is not available for voting!',
+              flags: ['Ephemeral'],
+            });
+            return;
+          }
         }
 
         // Record/update the vote
         const previousVote = game.votes.get(voterId);
         game.votes.set(voterId, targetId);
 
-        const previousTarget = previousVote ? game.players.get(previousVote) : undefined;
-        const voteMsg = previousVote
-          ? `🗳️ Vote changed from **${previousTarget?.displayName ?? 'Unknown'}** to **${target.displayName}**.`
-          : `🗳️ You voted for **${target.displayName}**.`;
+        const previousTarget = previousVote && previousVote !== 'SKIP' 
+          ? game.players.get(previousVote) 
+          : undefined;
+          
+        let voteMsg = '';
+        if (targetId === 'SKIP') {
+          voteMsg = previousVote
+            ? `🗳️ Vote changed to **Skip Vote**.`
+            : `🗳️ You chose to **Skip Vote**.`;
+        } else {
+          const target = game.players.get(targetId)!;
+          voteMsg = previousVote
+            ? `🗳️ Vote changed from **${previousTarget?.displayName ?? 'Skip Vote'}** to **${target.displayName}**.`
+            : `🗳️ You voted for **${target.displayName}**.`;
+        }
 
         await interaction.reply({
           content: voteMsg,
@@ -161,6 +174,8 @@ export async function runVotePhase(
       for (const player of alivePlayers) {
         tally.set(player.id, 0);
       }
+      tally.set('SKIP', 0);
+      
       for (const targetId of game.votes.values()) {
         tally.set(targetId, (tally.get(targetId) ?? 0) + 1);
       }
@@ -174,6 +189,11 @@ export async function runVotePhase(
           votes: tally.get(player.id) ?? 0,
         });
       }
+      results.push({
+        id: 'SKIP',
+        name: '⏭️ Skip Vote',
+        votes: tally.get('SKIP') ?? 0,
+      });
 
       // Post vote results
       try {
@@ -206,10 +226,23 @@ export async function runVotePhase(
 
       // Tie — no elimination
       if (topPlayers.length > 1) {
-        const tiedNames = topPlayers.map((p) => p.name);
+        const tiedNames = topPlayers.filter((p) => p.id !== 'SKIP').map((p) => p.name);
         try {
           await channel.send({
-            embeds: [tieEmbed(tiedNames, round)],
+            embeds: [tieEmbed(tiedNames, round, false)],
+          });
+        } catch {
+          // Channel unavailable
+        }
+        finish(null);
+        return;
+      }
+      
+      // Skip vote won
+      if (topPlayers[0].id === 'SKIP') {
+        try {
+          await channel.send({
+            embeds: [tieEmbed([], round, true)],
           });
         } catch {
           // Channel unavailable
