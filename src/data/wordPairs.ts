@@ -104,6 +104,23 @@ export const WORD_PAIRS: WordPair[] = [
   { civilian: 'Boots', spy: 'Shoes' },
   { civilian: 'Tie', spy: 'Bow Tie' },
 
+  { civilian: 'Tokyo', spy: 'Seoul' },
+  { civilian: 'Barcelona', spy: 'Madrid' },
+  { civilian: 'London', spy: 'Paris' },
+  { civilian: 'Messi', spy: 'Ronaldo' },
+  { civilian: 'MODI', spy: 'RAHUL GANDHI' },
+
+  { civilian: 'Coca-Cola', spy: 'Pepsi' },
+  { civilian: 'Nike', spy: 'Adidas' },
+  { civilian: 'Netflix', spy: 'Disney+' },
+  { civilian: 'iPhone', spy: 'Samsung Galaxy' },
+  { civilian: "McDonald's", spy: "Burger King" },
+  { civilian: 'Marvel', spy: 'DC' },
+  { civilian: 'Star Wars', spy: 'Star Trek' },
+  { civilian: 'PlayStation', spy: 'Xbox' },
+  { civilian: 'Spotify', spy: 'Apple Music' },
+  { civilian: 'Instagram', spy: 'TikTok' },
+
   // ── Bonus Pairs (6) — push us to 85 ────────────────────────────────────────
   { civilian: 'Couch', spy: 'Recliner' },
   { civilian: 'Skateboard', spy: 'Scooter' },
